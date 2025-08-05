@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: coachhub-api
+    env: node
+    plan: free
+    buildCommand: cd apps/api && npm install -g pnpm && pnpm install && pnpm build
+    startCommand: cd apps/api && pnpm start:prod
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://postgres.pjcecihebmynmqmnkleh:Giuseppe.hubcoach.01@aws-0-eu-west-3.pooler.supabase.com:6543/postgres
+      - key: JWT_SECRET
+        value: super-secret-production-key-2024
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000

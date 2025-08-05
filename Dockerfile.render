@@ -1,0 +1,32 @@
+# Render Dockerfile - 100% FREE
+FROM node:20-alpine
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Set working directory
+WORKDIR /app
+
+# Copy root files
+COPY package*.json ./
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+
+# Copy packages
+COPY packages/ ./packages/
+
+# Copy API
+COPY apps/api/ ./apps/api/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Build API
+WORKDIR /app/apps/api
+RUN pnpm build
+
+# Expose port (Render uses PORT env var)
+EXPOSE 10000
+
+# Start command
+CMD ["pnpm", "start:prod"]

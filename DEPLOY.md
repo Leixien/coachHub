@@ -3,7 +3,7 @@
 ## 💰 Costi: $0/mese per sempre!
 
 - ✅ **Vercel**: Gratis (Hobby Plan)  
-- ✅ **Railway**: $5 crediti gratis/mese
+- ✅ **Render**: Completamente GRATIS
 - ✅ **Supabase**: Database gratis 500MB
 
 ---
