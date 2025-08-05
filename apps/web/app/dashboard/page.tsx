@@ -1,7 +1,7 @@
 'use client'
 
-import { Button } from '@repo/ui'
-import { Card } from '@repo/ui'
+import { Button } from '../../components/ui/button'
+import { Card } from '../../components/ui/card'
 import Link from 'next/link'
 import { 
   Users, 
