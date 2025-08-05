@@ -3,8 +3,8 @@ services:
     name: coachhub-api
     env: node
     plan: free
-    buildCommand: chmod +x render-build.sh && ./render-build.sh
-    startCommand: cd apps/api && node dist/main.js
+    buildCommand: cd apps/api && cp package.deploy.json package.json && npm install && npm run build
+    startCommand: cd apps/api && npm run start:prod
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
@@ -17,7 +17,3 @@ services:
         value: production
       - key: PORT
         value: 10000
-      - key: PRISMA_ENGINE_TYPE
-        value: binary
-      - key: PRISMA_QUERY_ENGINE_BINARY
-        value: query-engine-rhel-openssl-1.0.x
