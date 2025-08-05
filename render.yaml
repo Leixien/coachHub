@@ -1,10 +1,10 @@
 services:
   - type: web
     name: coachhub-api
-    env: docker
+    env: node
     plan: free
-    dockerfilePath: ./Dockerfile.render
-    dockerContext: ./
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
+    startCommand: cd apps/api && node dist/main.js
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
