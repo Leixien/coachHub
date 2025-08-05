@@ -1,16 +1,13 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "pnpm build",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
   "env": {
     "NEXT_PUBLIC_SUPABASE_URL": "https://pjcecihebmynmqmnkleh.supabase.co",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqY2VjaWhlYm15bm1xbW5rbGVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNTQzMDAsImV4cCI6MjA2OTkzMDMwMH0.nXI_Y1GjTH9yI4brAuss09aWW9ONPkkkJ8K-sGZCiE4",
-    "NEXT_PUBLIC_API_URL": "https://your-railway-app.railway.app/graphql"
+    "NEXT_PUBLIC_API_URL": "https://coachhub-api.onrender.com/graphql",
+    "NEXT_PUBLIC_APP_NAME": "Coach Hub",
+    "NEXT_PUBLIC_APP_VERSION": "1.0.0"
   }
 }
