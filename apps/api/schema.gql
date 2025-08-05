@@ -1,0 +1,27 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateUserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  organizationId: String
+  password: String!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): String!
+  login(email: String!, password: String!): String!
+  register(email: String!, firstName: String!, lastName: String!, organizationId: String!, password: String!): String!
+}
+
+type Query {
+  getAnalytics: String!
+  getChats: String!
+  getExercises: String!
+  getOrganizations: String!
+  getPrograms: String!
+  getUsers: String!
+  getWorkouts: String!
+}

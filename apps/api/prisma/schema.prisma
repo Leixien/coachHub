@@ -1,0 +1,494 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  SUPER_ADMIN
+  COACH
+  ATHLETE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHT
+  MODERATE
+  ACTIVE
+  VERY_ACTIVE
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum VolumeType {
+  DIRECT
+  DIRECT_INDIRECT
+  CUSTOM
+  WORK_LINES
+}
+
+enum PhaseType {
+  STRENGTH
+  HYPERTROPHY
+  ENDURANCE
+  POWER
+  MIXED
+}
+
+enum ProgramStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum SetType {
+  STRAIGHT
+  SUPERSET
+  JUMP_SET
+  MULTISET
+  DROP_SET
+  REST_PAUSE
+}
+
+enum EffortLevel {
+  EASY
+  MODERATE
+  HARD
+  MAX
+}
+
+enum WorkoutLogStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+enum QuestionnaireFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+enum ChatType {
+  DIRECT
+  GROUP
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  WORKOUT_SHARE
+  SYSTEM
+}
+
+// Models
+model Organization {
+  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  slug          String @unique
+  logoUrl       String?
+  primaryColor  String? // hex color
+  secondaryColor String? // hex color
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  users               User[]
+  exercises           Exercise[]
+  volumeRubrics       VolumeRubric[]
+  programTemplates    ProgramTemplate[]
+  questionnaires      Questionnaire[]
+  chatRooms           ChatRoom[]
+
+  @@map("organizations")
+}
+
+model User {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email            String    @unique
+  passwordHash     String?
+  firstName        String
+  lastName         String
+  avatarUrl        String?
+  role             UserRole  @default(ATHLETE)
+  organizationId   String    @db.Uuid
+  emailVerified    Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  lastLoginAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  athleteProfile    AthleteProfile?
+  createdExercises  Exercise[]
+  createdPrograms   ProgramTemplate[]
+  assignedPrograms  ProgramInstance[] @relation("CoachAssignments")
+  bodyMeasurements  BodyMeasurement[]
+  workoutLogs       WorkoutLog[]
+  questionnaireResponses QuestionnaireResponse[]
+  chatParticipants  ChatParticipant[]
+  sentMessages      ChatMessage[]
+  createdQuestionnaires Questionnaire[] @relation("CreatedQuestionnaires")
+  createdVolumeRubrics VolumeRubric[] @relation("CreatedVolumeRubrics")
+  createdChatRooms  ChatRoom[] @relation("CreatedChatRooms")
+
+  @@index([organizationId, role])
+  @@map("users")
+}
+
+model AthleteProfile {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String        @unique @db.Uuid
+  dateOfBirth       DateTime?
+  gender            Gender?
+  heightCm          Int?
+  activityLevel     ActivityLevel?
+  goals             String[]
+  injuriesHistory   Json?
+  medicalConditions String[]
+  bmr               Decimal?      @db.Decimal(8,2) // Basal Metabolic Rate
+  tdee              Decimal?      @db.Decimal(8,2) // Total Daily Energy Expenditure
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bodyMeasurements  BodyMeasurement[]
+  programInstances  ProgramInstance[]
+  workoutLogs       WorkoutLog[]
+  questionnaireResponses QuestionnaireResponse[]
+
+  @@map("athlete_profiles")
+}
+
+model BodyMeasurement {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  athleteId       String    @db.Uuid
+  weightKg        Decimal?  @db.Decimal(5,2)
+  bodyFatPercentage Decimal? @db.Decimal(5,2)
+  muscleMassKg    Decimal?  @db.Decimal(5,2)
+  circumferences  Json?     // {chest: 100, waist: 80, ...}
+  skinfolds       Json?     // {triceps: 12, subscapular: 15, ...}
+  photos          Json?     // {front: "url", back: "url", side: "url"}
+  notes           String?
+  measuredAt      DateTime  @default(now())
+  createdBy       String    @db.Uuid
+
+  // Relations
+  athlete         AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  creator         User @relation(fields: [createdBy], references: [id])
+
+  @@index([athleteId, measuredAt])
+  @@map("body_measurements")
+}
+
+model MuscleGroup {
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String?
+  color       String? // hex color for UI
+  sortOrder   Int     @default(0)
+
+  // Relations
+  primaryExercises    Exercise[] @relation("PrimaryMuscleGroup")
+  secondaryExercises  Exercise[] @relation("SecondaryMuscleGroups")
+
+  @@map("muscle_groups")
+}
+
+model Exercise {
+  id                    String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                  String
+  description           String?
+  instructions          String?
+  videoUrl              String?
+  youtubeId             String?
+  thumbnailUrl          String?
+  primaryMuscleGroupId  String       @db.Uuid
+  secondaryMuscleGroups String[]     @db.Uuid // array of muscle_group IDs
+  equipmentNeeded       String[]
+  difficultyLevel       Difficulty   @default(BEGINNER)
+  isDefault             Boolean      @default(false) // seed exercises
+  organizationId        String?      @db.Uuid
+  createdBy             String       @db.Uuid
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  // Relations
+  organization          Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator               User @relation(fields: [createdBy], references: [id])
+  primaryMuscleGroup    MuscleGroup @relation("PrimaryMuscleGroup", fields: [primaryMuscleGroupId], references: [id])
+  secondaryMuscles      MuscleGroup[] @relation("SecondaryMuscleGroups")
+  workoutExercises      WorkoutExercise[]
+
+  @@index([organizationId])
+  @@map("exercises")
+}
+
+model VolumeRubric {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  type           VolumeType
+  description    String?
+  muscleGroups   String[]     @db.Uuid // array of muscle_group IDs
+  organizationId String       @db.Uuid
+  createdBy      String       @db.Uuid
+  createdAt      DateTime     @default(now())
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User @relation("CreatedVolumeRubrics", fields: [createdBy], references: [id])
+
+  @@map("volume_rubrics")
+}
+
+model ProgramTemplate {
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String
+  description       String?
+  durationWeeks     Int
+  phaseType         PhaseType?
+  tags              String[]
+  isPublic          Boolean     @default(false)
+  organizationId    String      @db.Uuid
+  createdBy         String      @db.Uuid
+  version           Int         @default(1)
+  parentTemplateId  String?     @db.Uuid // for versioning
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator           User @relation(fields: [createdBy], references: [id])
+  parentTemplate    ProgramTemplate? @relation("TemplateVersions", fields: [parentTemplateId], references: [id])
+  childTemplates    ProgramTemplate[] @relation("TemplateVersions")
+  workoutDays       WorkoutDay[]
+  instances         ProgramInstance[]
+
+  @@map("program_templates")
+}
+
+model ProgramInstance {
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  templateId String         @db.Uuid
+  athleteId  String         @db.Uuid
+  coachId    String         @db.Uuid
+  name       String
+  startDate  DateTime
+  endDate    DateTime?
+  status     ProgramStatus  @default(DRAFT)
+  notes      String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  // Relations
+  template   ProgramTemplate @relation(fields: [templateId], references: [id])
+  athlete    AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  coach      User @relation("CoachAssignments", fields: [coachId], references: [id])
+  workoutDays WorkoutDay[]
+  workoutLogs WorkoutLog[]
+
+  @@map("program_instances")
+}
+
+model WorkoutDay {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  programTemplateId   String?            @db.Uuid
+  programInstanceId   String?            @db.Uuid
+  dayNumber           Int
+  weekNumber          Int                @default(1)
+  name                String
+  notes               String?
+  sortOrder           Int                @default(0)
+
+  // Relations
+  programTemplate     ProgramTemplate? @relation(fields: [programTemplateId], references: [id], onDelete: Cascade)
+  programInstance     ProgramInstance? @relation(fields: [programInstanceId], references: [id], onDelete: Cascade)
+  workoutExercises    WorkoutExercise[]
+  workoutLogs         WorkoutLog[]
+
+  @@map("workout_days")
+}
+
+model WorkoutExercise {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workoutDayId    String       @db.Uuid
+  exerciseId      String       @db.Uuid
+  sortOrder       Int          @default(0)
+  setType         SetType      @default(STRAIGHT)
+  sets            Int          @default(3)
+  repsMin         Int?
+  repsMax         Int?
+  weightKg        Decimal?     @db.Decimal(6,2)
+  percentage1rm   Decimal?     @db.Decimal(5,2)
+  rpe             Decimal?     @db.Decimal(3,1)
+  effortLevel     EffortLevel?
+  restSeconds     Int          @default(90)
+  notes           String?
+  supersetGroup   Int?         // for grouping supersets
+  progressionRule Json?        // rules for auto-progression
+
+  // Relations
+  workoutDay      WorkoutDay @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+  exercise        Exercise @relation(fields: [exerciseId], references: [id])
+  setLogs         SetLog[]
+
+  @@map("workout_exercises")
+}
+
+model WorkoutLog {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  programInstanceId String            @db.Uuid
+  workoutDayId      String            @db.Uuid
+  athleteId         String            @db.Uuid
+  plannedDate       DateTime
+  completedDate     DateTime?
+  status            WorkoutLogStatus  @default(SCHEDULED)
+  durationMinutes   Int?
+  overallRpe        Decimal?          @db.Decimal(3,1)
+  notes             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  // Relations
+  programInstance   ProgramInstance @relation(fields: [programInstanceId], references: [id])
+  workoutDay        WorkoutDay @relation(fields: [workoutDayId], references: [id])
+  athlete           AthleteProfile @relation(fields: [athleteId], references: [id])
+  user              User @relation(fields: [athleteId], references: [id], map: "workout_logs_userId_fkey")
+  setLogs           SetLog[]
+
+  @@index([athleteId, plannedDate])
+  @@map("workout_logs")
+}
+
+model SetLog {
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workoutLogId      String          @db.Uuid
+  workoutExerciseId String          @db.Uuid
+  setNumber         Int
+  repsCompleted     Int?
+  weightKg          Decimal?        @db.Decimal(6,2)
+  rpe               Decimal?        @db.Decimal(3,1)
+  effortLevel       EffortLevel?
+  restSeconds       Int?
+  notes             String?
+  completedAt       DateTime        @default(now())
+
+  // Relations
+  workoutLog        WorkoutLog @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
+  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id])
+
+  @@map("set_logs")
+}
+
+model Questionnaire {
+  id             String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  description    String?
+  questions      Json                       // array of question objects
+  frequency      QuestionnaireFrequency?
+  isActive       Boolean                    @default(true)
+  organizationId String                     @db.Uuid
+  createdBy      String                     @db.Uuid
+  createdAt      DateTime                   @default(now())
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User @relation("CreatedQuestionnaires", fields: [createdBy], references: [id])
+  responses      QuestionnaireResponse[]
+
+  @@map("questionnaires")
+}
+
+model QuestionnaireResponse {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  questionnaireId String         @db.Uuid
+  athleteId       String         @db.Uuid
+  responses       Json           // answers mapped to question IDs
+  completedAt     DateTime       @default(now())
+
+  // Relations
+  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id])
+  athlete         AthleteProfile @relation(fields: [athleteId], references: [id])
+  user            User @relation(fields: [athleteId], references: [id], map: "questionnaire_responses_userId_fkey")
+
+  @@map("questionnaire_responses")
+}
+
+model ChatRoom {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String?
+  type           ChatType   @default(DIRECT)
+  organizationId String     @db.Uuid
+  createdBy      String     @db.Uuid
+  createdAt      DateTime   @default(now())
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User @relation("CreatedChatRooms", fields: [createdBy], references: [id])
+  participants   ChatParticipant[]
+  messages       ChatMessage[]
+
+  @@map("chat_rooms")
+}
+
+model ChatParticipant {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chatRoomId   String    @db.Uuid
+  userId       String    @db.Uuid
+  joinedAt     DateTime  @default(now())
+  lastReadAt   DateTime  @default(now())
+
+  // Relations
+  chatRoom     ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([chatRoomId, userId])
+  @@map("chat_participants")
+}
+
+model ChatMessage {
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chatRoomId   String      @db.Uuid
+  senderId     String      @db.Uuid
+  content      String
+  messageType  MessageType @default(TEXT)
+  metadata     Json?       // for file attachments, etc.
+  replyToId    String?     @db.Uuid
+  isEdited     Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relations
+  chatRoom     ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  sender       User @relation(fields: [senderId], references: [id])
+  replyTo      ChatMessage? @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies      ChatMessage[] @relation("MessageReplies")
+
+  @@index([chatRoomId, createdAt])
+  @@map("chat_messages")
+}

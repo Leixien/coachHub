@@ -1,0 +1,36 @@
+{
+  "name": "coach-hub",
+  "version": "1.0.0",
+  "description": "Piattaforma avanzata per personal training - Clone di Performance Universe",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "clean": "turbo run clean",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "turbo run db:migrate",
+    "db:push": "pnpm --filter \"@repo/api\" exec prisma db push",
+    "db:seed": "turbo run db:seed",
+    "db:studio": "turbo run db:studio",
+    "setup:supabase": "bash setup-supabase.sh",
+    "deploy:preview": "turbo run deploy:preview",
+    "deploy:prod": "turbo run deploy:prod",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "@turbo/gen": "^1.10.12",
+    "turbo": "^1.10.12",
+    "prettier": "^3.0.0",
+    "eslint": "^8.48.0",
+    "typescript": "^5.2.0"
+  },
+  "packageManager": "pnpm@8.6.10",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

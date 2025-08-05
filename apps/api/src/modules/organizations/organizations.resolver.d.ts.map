@@ -1,0 +1,1 @@
+{"version":3,"file":"organizations.resolver.d.ts","sourceRoot":"","sources":["organizations.resolver.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,oBAAoB,EAAE,MAAM,yBAAyB,CAAC;AAE/D,qBACa,qBAAqB;IACpB,OAAO,CAAC,QAAQ,CAAC,oBAAoB;gBAApB,oBAAoB,EAAE,oBAAoB;IAGjE,gBAAgB,IAAI,OAAO,CAAC,MAAM,CAAC;CAG1C"}

@@ -1,0 +1,44 @@
+export declare const appConfig: (() => {
+    port: number;
+    nodeEnv: string;
+    apiVersion: string;
+    redisUrl: string;
+    supabaseUrl: string;
+    supabaseAnonKey: string;
+    supabaseServiceKey: string;
+    awsRegion: string;
+    awsAccessKeyId: string;
+    awsSecretAccessKey: string;
+    awsS3Bucket: string;
+    smtpHost: string;
+    smtpPort: number;
+    smtpUser: string;
+    smtpPassword: string;
+    fcmServerKey: string;
+    apnsBundleId: string;
+    apnsKey: string;
+    sentryDsn: string;
+    grafanaApiKey: string;
+}) & import("@nestjs/config").ConfigFactoryKeyHost<{
+    port: number;
+    nodeEnv: string;
+    apiVersion: string;
+    redisUrl: string;
+    supabaseUrl: string;
+    supabaseAnonKey: string;
+    supabaseServiceKey: string;
+    awsRegion: string;
+    awsAccessKeyId: string;
+    awsSecretAccessKey: string;
+    awsS3Bucket: string;
+    smtpHost: string;
+    smtpPort: number;
+    smtpUser: string;
+    smtpPassword: string;
+    fcmServerKey: string;
+    apnsBundleId: string;
+    apnsKey: string;
+    sentryDsn: string;
+    grafanaApiKey: string;
+}>;
+//# sourceMappingURL=app.config.d.ts.map
