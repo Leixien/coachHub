@@ -3,7 +3,8 @@ services:
     name: coachhub-api
     env: node
     plan: free
-    buildCommand: cd apps/api && cp package.deploy.json package.json && npm install && npm run build
+    region: frankfurt
+    buildCommand: cd apps/api && cp package.deploy.json package.json && npm ci && npm run build
     startCommand: cd apps/api && npm run start:prod
     healthCheckPath: /health
     envVars:

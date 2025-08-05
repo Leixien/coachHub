@@ -34,12 +34,14 @@ import { appConfig } from './config/app.config';
     }),
 
     // Rate limiting
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000, // 1 minute
-        limit: 100, // 100 requests per minute
-      },
-    ]),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000, // 1 minute
+          limit: 100, // 100 requests per minute
+        },
+      ],
+    }),
 
     // GraphQL
     GraphQLModule.forRootAsync<ApolloDriverConfig>({

@@ -8,13 +8,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       // Configurazione per production/Render
       log: process.env.NODE_ENV === 'production' ? ['error'] : ['query', 'info', 'warn', 'error'],
       errorFormat: 'minimal',
-      // Disabilita tracing per evitare errori su Render
-      __internal: {
-        debug: false,
-        engine: {
-          enableTracing: false
-        }
-      }
     });
   }
 
