@@ -1,11 +1,10 @@
 services:
   - type: web
     name: coachhub-api
-    env: node
+    env: docker
     plan: free
-    buildCommand: cd apps/api && npm install -g pnpm && pnpm install && pnpm build
-    startCommand: cd apps/api && pnpm start:prod
-    healthCheckPath: /health
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: ./
     envVars:
       - key: DATABASE_URL
         value: postgresql://postgres.pjcecihebmynmqmnkleh:Giuseppe.hubcoach.01@aws-0-eu-west-3.pooler.supabase.com:6543/postgres

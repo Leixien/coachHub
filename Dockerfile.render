@@ -1,13 +1,13 @@
 # Render Dockerfile - 100% FREE
 FROM node:20-alpine
 
-# Install pnpm
-RUN npm install -g pnpm
+# Install pnpm and NestJS CLI
+RUN npm install -g pnpm @nestjs/cli
 
 # Set working directory
 WORKDIR /app
 
-# Copy root files
+# Copy workspace files
 COPY package*.json ./
 COPY pnpm-workspace.yaml ./
 COPY pnpm-lock.yaml ./
@@ -18,15 +18,23 @@ COPY packages/ ./packages/
 # Copy API
 COPY apps/api/ ./apps/api/
 
-# Install dependencies
+# Install all dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build API
+# Build API specifically
 WORKDIR /app/apps/api
-RUN pnpm build
 
-# Expose port (Render uses PORT env var)
+# Generate Prisma client
+RUN npx prisma generate
+
+# Build with NestJS CLI
+RUN nest build
+
+# Verify build output
+RUN ls -la dist/
+
+# Expose port
 EXPOSE 10000
 
 # Start command
-CMD ["pnpm", "start:prod"]
+CMD ["node", "dist/main"]

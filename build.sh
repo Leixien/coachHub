@@ -12,11 +12,21 @@ fi
 echo "📦 Installing dependencies..."
 pnpm install --frozen-lockfile
 
+# Install NestJS CLI globally
+echo "🏗️ Installing NestJS CLI..."
+npm install -g @nestjs/cli
+
 # Navigate to API directory
 cd apps/api
 
-# Build the application
+# Generate Prisma client
+echo "🔧 Generating Prisma client..."
+npx prisma generate
+
+# Build the application with explicit TypeScript compilation
 echo "🏗️ Building NestJS application..."
-pnpm build
+npx tsc -p tsconfig.build.json
 
 echo "✅ Build completed successfully!"
+echo "📁 Contents of dist directory:"
+ls -la dist/ || echo "❌ No dist directory found"
