@@ -1,10 +1,10 @@
 services:
   - type: web
     name: coachhub-api
-    env: docker
+    env: node
     plan: free
-    dockerfilePath: ./Dockerfile.render
-    dockerContext: ./
+    buildCommand: npm install -g pnpm @nestjs/cli typescript && pnpm install --frozen-lockfile && cd apps/api && npx prisma generate && nest build
+    startCommand: cd apps/api && node dist/main
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL

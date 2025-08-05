@@ -5,6 +5,8 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "build:api": "cd apps/api && npm install -g @nestjs/cli && npx prisma generate && nest build",
+    "start:api": "cd apps/api && node dist/main",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
