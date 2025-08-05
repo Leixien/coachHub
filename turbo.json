@@ -10,10 +10,18 @@
       "cache": false,
       "persistent": true
     },
-    "lint": {},
-    "test": {},
-    "test:e2e": {},
-    "typecheck": {},
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["build"]
+    },
+    "test:e2e": {
+      "dependsOn": ["build"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
     "clean": {
       "cache": false
     },

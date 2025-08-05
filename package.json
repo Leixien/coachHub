@@ -9,6 +9,8 @@
     "start:api": "cd apps/api && node dist/main",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --fix",
+    "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
     "clean": "turbo run clean",
@@ -20,8 +22,7 @@
     "setup:supabase": "bash setup-supabase.sh",
     "deploy:preview": "turbo run deploy:preview",
     "deploy:prod": "turbo run deploy:prod",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "typecheck": "turbo run typecheck"
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
     "@turbo/gen": "^1.10.12",
